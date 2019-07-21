@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  gogs:
+    image: gogs/gogs
+    ports:
+     - "10022:22"
+     - "10080:3000"
+    volumes:
+     - /var/gogs:/data
+    container_name: gogs
+  jenkins:
+    build: images/Jenkins
+    ports:
+     - "8080:8080"
+     - "50000:50000"
+    volumes:
+     - jenkins_home:/var/jenkins_home
+     - /var/run/docker.sock:/var/run/docker.sock
+    container_name: jenkins
+    environment:
+      - 'JAVA_OPTS=-Djenkins.install.runSetupWizard=false'
+#     - 'JAVA_OPTS=-Dhudson.security.ArtifactsPermission=true'
+      - 'admin_name=admin'
+      - 'admin_password=password'
+  portainer:
+    image: portainer/portainer
+    command: --admin-password-file /tmp/admin_password --host=unix:///var/run/docker.sock
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+      - ./images/Portainer/files/admin_password:/tmp/admin_password
+#    restart: always
+    container_name: portainer
+
+volumes:
+  jenkins_home:
+  portainer_data:
